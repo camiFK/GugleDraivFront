@@ -1,44 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import fileService from '../services/fileService';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
-function FileList() {
-
-  const [files, setFiles] = useState([]);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      const data = await fileService.getAllFiles();
-
-      const formattedFiles = data.map((file, index) => ({
-        id: file.id,         
-        nombre: file.fileName, 
-        path: file.filePath,   
-      }));
-
-      console.log(data);
-      setFiles(formattedFiles);
-    };
-    fetchFiles();
-  }, []);
+function FileList({ files, selectedFolder }) {
+  
+  const [searchText, setSearchText] = useState('');
+  const filteredFiles = files.filter((file) =>
+    file.nombre.toLowerCase().includes(searchText.toLowerCase()) &&
+    (!selectedFolder || file.path.includes(selectedFolder))
+  );
+ 
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 500, width: '100%' }}>
+      <TextField
+        label="Buscar archivo"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+      />
       <DataGrid
-        rows={files}
+        rows={filteredFiles}
         columns={[
           { field: 'id', headerName: 'Id', width: 150 },
           { field: 'nombre', headerName: 'Nombre', width: 250 },
-          { 
-            field: 'path', 
-            headerName: 'Path', 
-            width: 250, 
+          {
+            field: 'path',
+            headerName: 'Path',
+            width: 250,
             renderCell: (params) => (
               <a href={params.value} target="_blank" rel="noopener noreferrer">
                 {params.value}
               </a>
-            )
-          }
+            ),
+          },
         ]}
         pageSize={5}
         rowsPerPageOptions={[5]}
