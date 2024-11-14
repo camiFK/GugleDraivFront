@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 //Componente para crear carpetas
-const FolderManager = ({ folders, setFolders, selectedFolder, setSelectedFolder }) => {
+const FolderManager = ({ folders, setFolders, selectedFolder, setSelectedFolder, onDeleteFolder }) => {
   const [newFolderName, setNewFolderName] = useState('');
 
   const createFolder = () => {
@@ -21,7 +23,7 @@ const FolderManager = ({ folders, setFolders, selectedFolder, setSelectedFolder 
         variant="outlined"
         value={newFolderName}
         onChange={(e) => setNewFolderName(e.target.value)}
-        sx={{ mb: 2 }}
+        sx={{ mr: 2, mb: 2 }}
       />
       <Button variant="contained" color="primary" onClick={createFolder} sx={{ mb: 2 }}>
         Crear Carpeta
@@ -39,6 +41,14 @@ const FolderManager = ({ folders, setFolders, selectedFolder, setSelectedFolder 
           ))}
         </select>
       </Box>
+      {folders.map((folder) => (
+        <Box key={folder.nombre} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <span>{folder.nombre}</span>
+          <IconButton color="error" onClick={() => onDeleteFolder(folder.nombre)}>
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      ))}
     </Box>
   );
 };

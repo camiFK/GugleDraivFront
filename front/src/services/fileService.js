@@ -36,6 +36,11 @@ const fileService = {
 //     }
 //   }
 
+// Método para eliminar un archivo específico por ID (Falta el back)
+
+// Método para eliminar una carpeta y todos sus archivos (Falta el back)
+
+
 };
 
 export default fileService;
