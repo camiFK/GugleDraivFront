@@ -32,7 +32,7 @@ function FileList({ files, onDeleteFile, selectedFolder }) {
         renderCell: (params) => (
           <IconButton
             color="error"
-            onClick={() => onDeleteFile(params.row.id)}
+            onClick={() => onDeleteFile(params.row.id, false)}           
           >
             <DeleteIcon />
           </IconButton>
@@ -59,6 +59,7 @@ function FileList({ files, onDeleteFile, selectedFolder }) {
         rowsPerPageOptions={[5]}
         disableSelectionOnClick
         getRowId={(row) => row.id}
+        
       />
     </div>
   );

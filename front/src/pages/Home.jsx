@@ -10,31 +10,30 @@ function Home() {
   const [folders, setFolders] = useState([]); 
   const [selectedFolder, setSelectedFolder] = useState(''); 
   
-    // Función para eliminar un archivo
-    const handleDeleteFile = async (fileId) => {
-      const response = await fileService.deleteFile(fileId);
-      if (response.success) {
+  const handleDelete = async (id, isFolder) => {
+    const token = "test"; 
+    const systemId = "test";
+    const response = await fileService.deleteFileOrFolder(id, token, systemId);
+  
+    if (response.success) {
+      if (isFolder) {
+        setFolders((prevFolders) =>
+          prevFolders.filter((folder) => folder.nombre !== id)
+        );
+        if (selectedFolder === id) {
+          setSelectedFolder('');
+        }
+      } else {
         setFolders((prevFolders) =>
           prevFolders.map((folder) =>
             folder.nombre === selectedFolder
-              ? { ...folder, archivos: folder.archivos.filter((file) => file.id !== fileId) }
+              ? { ...folder, archivos: folder.archivos.filter((file) => file.id !== id) }
               : folder
           )
         );
       }
-    };
-  
-    // Función para eliminar una carpeta y sus archivos en cascada
-    const handleDeleteFolder = async (folderName) => {
-      const response = await fileService.deleteFolder(folderName);
-      if (response.success) {
-        setFolders((prevFolders) => prevFolders.filter((folder) => folder.nombre !== folderName));
-        if (selectedFolder === folderName) {
-          setSelectedFolder(''); // Limpiar la selección si la carpeta eliminada era la seleccionada
-        }
-      }
-
-    };
+    }
+  };
 
   const handleUpload = async (file) => {
     if (selectedFolder) {
@@ -77,7 +76,7 @@ function Home() {
                 setFolders={setFolders} 
                 selectedFolder={selectedFolder} 
                 setSelectedFolder={setSelectedFolder} 
-                onDeleteFolder={handleDeleteFolder} 
+                onDeleteFolder={handleDelete} 
               />
             </Paper>
           </Grid2>
@@ -95,8 +94,8 @@ function Home() {
                 Archivos
               </Typography>
               <FileList 
-                files={selectedFolder ? folders.find(folder => folder.nombre === selectedFolder).archivos : []} 
-                onDeleteFile={handleDeleteFile} 
+                files={getSelectedFolderFiles()} 
+                onDeleteFile={handleDelete}  
               />
             </Paper>
           </Grid2>

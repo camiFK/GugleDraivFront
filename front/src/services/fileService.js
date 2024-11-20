@@ -25,6 +25,18 @@ const fileService = {
     }
   },
 
+  deleteFileOrFolder: async (fileId, token, systemId) => {
+    try {
+      const response = await axios.delete(`${API_URL}/${fileId}`, {
+        data: { token, systemId }, // el data se usa para pasar el cuerpo en una solicitud DELETE
+      });
+      return response.data; // Devuelve la respuesta del backend
+    } catch (error) {
+      console.error(`Error al eliminar el archivo/carpeta con ID ${fileId}:`, error);
+      return { message: "No se pudo eliminar el archivo/carpeta" }; 
+    }
+  }
+
 
 //   uploadFile: async (fileData) => {
 //     try {
@@ -36,9 +48,6 @@ const fileService = {
 //     }
 //   }
 
-// Método para eliminar un archivo específico por ID (Falta el back)
-
-// Método para eliminar una carpeta y todos sus archivos (Falta el back)
 
 
 };

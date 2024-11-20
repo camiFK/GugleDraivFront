@@ -25,7 +25,7 @@ const FolderManager = ({ folders, setFolders, selectedFolder, setSelectedFolder,
         onChange={(e) => setNewFolderName(e.target.value)}
         sx={{ mr: 2, mb: 2 }}
       />
-      <Button variant="contained" color="primary" onClick={createFolder} sx={{ mb: 2 }}>
+      <Button variant="contained" color="primary" onClick={createFolder} sx={{ mb: 2}}>
         Crear Carpeta
       </Button>
       
@@ -44,7 +44,7 @@ const FolderManager = ({ folders, setFolders, selectedFolder, setSelectedFolder,
       {folders.map((folder) => (
         <Box key={folder.nombre} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
           <span>{folder.nombre}</span>
-          <IconButton color="error" onClick={() => onDeleteFolder(folder.nombre)}>
+          <IconButton color="error" onClick={() => onDeleteFolder(folder.nombre, true)}>
             <DeleteIcon />
           </IconButton>
         </Box>
