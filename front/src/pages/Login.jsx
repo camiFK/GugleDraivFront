@@ -6,6 +6,7 @@ import {
     Typography,
     Paper,
   } from "@mui/material";
+  import fileService from '../services/fileService';
 
   const Login = () => {
 
@@ -14,8 +15,8 @@ import {
       const data = new FormData(event.currentTarget);
       const username = data.get("username");
       const password = data.get("password");
-      //console.log("Username:", username);
-      //console.log("Password:", password);
+
+      fileService.loginAndSaveToken(username, password);
     };
   
     return (
