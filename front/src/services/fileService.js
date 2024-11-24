@@ -66,14 +66,14 @@ const fileService = {
       });
       const userData = response.data;
       console.log(userData);
-      const saveUser = await axios.post(`${API_URL}/users`, {
+      await axios.post(`${API_URL}/users`, {
         userName: userData.userId,
         token: userData.token,
         expiresIn: userData.expiresIn,
       });
-      return saveUser.status;
+      localStorage.setItem("authToken", userData.token); // Se guarda el token
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   },
 
