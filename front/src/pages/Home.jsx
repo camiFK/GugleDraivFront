@@ -13,7 +13,7 @@ function Home() {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) {
-      window.location.href = "../pages/Login"; 
+      window.location.href = "/login"; 
     }
   }, []);
 
