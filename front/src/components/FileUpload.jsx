@@ -4,7 +4,7 @@ import TextField from "@mui/material/TextField";
 import fileService from "../services/fileService";
 import { useState, useEffect } from "react";
 
-function FileUpload() {
+function FileUpload({setErrorMessage}) {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
   const [filePath, setFilePath] = useState("");
@@ -26,10 +26,12 @@ function FileUpload() {
 
   const handleUpload = async () => {
     if (!file) {
-      setMessage("Por favor, selecciona un archivo.");
-      return;
+      setErrorMessage({
+        message: "Por favor, selecciona un archivo antes de subir.",
+        severity: "error",
+      });
+      return
     }
-
     try {
       const payload = {
         token: token,
@@ -55,13 +57,8 @@ function FileUpload() {
   return (
     <div>
       <input type="file" onChange={handleFileChange} />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleUpload}
-        style={{ marginTop: "10px" }}
-      >
-        Subir archivo
+      <Button onClick={handleUpload} variant="contained" color="primary" style={{ marginTop: "12px", width: "100%" }}>
+        Subir Archivo
       </Button>
       {message && <p>{message}</p>}
     </div>

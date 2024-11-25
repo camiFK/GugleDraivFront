@@ -24,7 +24,7 @@ const fileService = {
       return { message: "Archivo no encontrado" };
     }
   },
-
+  
   uploadFile: async ({
     token,
     systemId,
@@ -79,12 +79,13 @@ const fileService = {
     }
   },
 
-  deleteFile: async (fileId, token, systemId) => {
+  deleteFileOrFolder: async (fileId, token, systemId) => {
     try {
       const response = await axios.delete(`${API_URL}/files/${fileId}`, {
         token: token,
         systemId: systemId
       })
+      return response.data;
     } catch (error) {
       console.log(error);
     }
