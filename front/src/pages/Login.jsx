@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
+
   const handleLogin = async (event) => {
-    
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const username = data.get("username");
@@ -15,10 +15,7 @@ const Login = () => {
 
     try {
       const userData = await fileService.loginAndSaveToken(username, password);
-      console.log("Datos del usuario:", userData); // Para saber que devuelve
-      // Guarda el token en localStorage
       localStorage.setItem("authToken", userData.token);
-      // Vuelve a la aplicación principal
       navigate('/home'); 
     } catch (error) {
       console.error("Error al iniciar sesión:", error);

@@ -4,6 +4,7 @@ const API_URL = 'http://localhost:8082';
 const PROD_URL = 'https://poo2024.unsada.edu.ar'
 
 const fileService = {
+
   getAllFiles: async () => {
     try {
       const response = await axios.get(`${API_URL}/files`);
@@ -65,13 +66,12 @@ const fileService = {
         password: password,
       });
       const userData = response.data;
-      console.log(userData);
       await axios.post(`${API_URL}/users`, {
         userName: userData.userId,
         token: userData.token,
         expiresIn: userData.expiresIn,
       });
-      localStorage.setItem("authToken", userData.token); // Se guarda el token
+      return userData;
     } catch (error) {
       throw error;
     }
