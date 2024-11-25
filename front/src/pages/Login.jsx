@@ -14,9 +14,8 @@ const Login = () => {
     const password = data.get("password");
 
     try {
-      const userData = await fileService.loginAndSaveToken(username, password);
-      localStorage.setItem("authToken", userData.token);
-      navigate('/home'); 
+      const userToken = await fileService.loginAndSaveToken(username, password);
+      userToken != null ? navigate('/home') : alert("Error al iniciar sesión. Verifica tus credenciales."); 
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       alert("Error al iniciar sesión. Verifica tus credenciales.");

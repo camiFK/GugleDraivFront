@@ -66,12 +66,14 @@ const fileService = {
         password: password,
       });
       const userData = response.data;
+      localStorage.setItem("authToken", userData.token);
+      var token = localStorage.getItem("authToken");
       await axios.post(`${API_URL}/users`, {
         userName: userData.userId,
-        token: userData.token,
+        token: token,
         expiresIn: userData.expiresIn,
       });
-      return userData;
+      return token;
     } catch (error) {
       throw error;
     }
