@@ -3,8 +3,8 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8082';
 const PROD_URL = 'https://poo2024.unsada.edu.ar'
 
-// var token = localStorage.getItem("authToken");
-var token = "token1";
+var token = localStorage.getItem("authToken");
+//var token = "token1";
 
 const fileService = {
   getAllFiles: async (path = null) => {
@@ -58,7 +58,7 @@ const fileService = {
         isPublic: false
       });
       if (response.status === 200) {
-        return response.data; 
+        return response.data;
       } else {
         throw new Error("Error inesperado al crear la carpeta.");
       }
@@ -118,6 +118,30 @@ const fileService = {
       return token;
     } catch (error) {
       throw error;
+    }
+  },
+
+  logout: async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("No hay un token de autenticación disponible.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}/users/logout` , {
+        token: token
+      });
+
+      if (response.status === 200) {
+        
+        localStorage.removeItem("authToken");
+        console.log("Sesión cerrada exitosamente.");
+      } else {
+        throw new Error("Error al cerrar sesión en el servidor.");
+      }
+    } catch (error) {
+      console.error("Error al intentar cerrar la sesión:", error);
     }
   },
 
