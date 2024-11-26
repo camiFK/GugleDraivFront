@@ -31,7 +31,7 @@ function Home() {
   useEffect(() => {
     var token = localStorage.getItem("authToken");
     if (!token) {
-      window.location.href = "/login";
+      window.location.href = "/login"; 
     }
   }, []);
 
@@ -89,32 +89,33 @@ function Home() {
   };
 
   const confirmUpload = () => {
-    if (selectedFolder) {
-      const newFile = {
-        id: Date.now(),
-        nombre: file.name,
-        path: `path/to/${selectedFolder}/${file.name}`,
-      };
-      setFolders((prevFolders) =>
-        prevFolders.map((folder) =>
-          folder.nombre === selectedFolder
-            ? { ...folder, archivos: [...folder.archivos, newFile] }
-            : folder
-        )
-      );
-      setAlert({
-        message: "¡Archivo subido correctamente!",
-        severity: "success",
-      });
-    } else {
-      alert("Por favor, selecciona una carpeta para subir el archivo.");
-    }
-    setOpenSnackbar(true);
-    setDialogOpen(false); // Cerrar el diálogo después de la subida
+    // if (selectedFolder) {
+    //   const newFile = {
+    //     id: Date.now(),
+    //     nombre: file.name,
+    //     path: `path/to/${selectedFolder}/${file.name}`,
+    //   };
+    //   setFolders((prevFolders) =>
+    //     prevFolders.map((folder) =>
+    //       folder.nombre === selectedFolder
+    //         ? { ...folder, archivos: [...folder.archivos, newFile] }
+    //         : folder
+    //     )
+    //   );
+    //   setAlert({
+    //     message: "¡Archivo subido correctamente!",
+    //     severity: "success",
+    //   });
+    // } else {
+    //   alert("Por favor, selecciona una carpeta para subir el archivo.");
+    // }
+    // setOpenSnackbar(true);
+    // setDialogOpen(false); // Cerrar el diálogo después de la subida
   };
 
   const getSelectedFolderFiles = () => {
-    const folder = folders.find((folder) => folder.nombre === selectedFolder);
+    const folder = folders.find((folder) => folder.fileName === selectedFolder);
+    console.log(folder)
     return folder ? folder.archivos : [];
   };
 
@@ -190,23 +191,10 @@ function Home() {
             <Typography variant="h6" gutterBottom>
               Archivos y Carpetas
             </Typography>
-            {selectedFolder ? (
-              <>
-                <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                  Carpeta seleccionada: <strong>{selectedFolder}</strong>
-                </Typography>
-                <FileList
-                  files={getSelectedFolderFiles()}
-                  onDeleteFile={handleDelete}
-                  setAlert={setAlert}
-                />
-              </>
-            ) : (
-              <Typography variant="body1" sx={{ mt: 2 }}>
-                No se ha seleccionado ninguna carpeta. Por favor, selecciona una
-                desde el menú Administrar Carpetas.
-              </Typography>
-            )}
+            <FileList
+              onDeleteFile={handleDelete}
+              selectedFolder={selectedFolder}
+            />
           </Paper>
         )}
 
@@ -217,12 +205,11 @@ function Home() {
               Administrar Carpetas
             </Typography>
             <FolderManager
-              folders={folders}
-              setFolders={setFolders}
               selectedFolder={selectedFolder}
               setSelectedFolder={setSelectedFolder}
               onDeleteFolder={handleDelete}
             />
+            {/* <CreateFolder /> */}
           </Paper>
         )}
 

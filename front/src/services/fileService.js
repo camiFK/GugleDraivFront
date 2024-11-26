@@ -3,15 +3,31 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8082';
 const PROD_URL = 'https://poo2024.unsada.edu.ar'
 
-const fileService = {
+// var token = localStorage.getItem("authToken");
+var token = "token1";
 
-  getAllFiles: async () => {
+const fileService = {
+  getAllFiles: async (path = null) => {
     try {
-      const response = await axios.get(`${API_URL}/files`);
+      let url = `${API_URL}/files?token=${token}&systemId=3`;
+      if (path) { // parametro opcional, si existe construye la url
+        url += `&file=${encodeURIComponent(path)}`;
+      }
+      const response = await axios.get(url);
       return response.data;
     } catch (error) {
       console.error("Error al obtener los archivos:", error);
-      return { message: "No se pudo obtener los archivos" };
+      throw error;
+    }
+  },
+
+  getAllFolders: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/files?token=${token}&systemId=3`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener las carpetas:", error);
+      throw error;
     }
   },
 
@@ -21,7 +37,34 @@ const fileService = {
       return response.data;
     } catch (error) {
       console.error(`Error al obtener el archivo con ID ${id}:`, error);
-      return { message: "Archivo no encontrado" };
+      throw error;
+    }
+  },
+
+  createFolder: async (fileName) => {
+    if (!fileName || !fileName.trim()) {
+      throw new Error("El nombre de la carpeta no puede estar vacío.");
+    }
+    try {
+      const response = await axios.post(`${API_URL}/files`, {
+        token: token,
+        systemId: "3",
+        isFolder: true,
+        filePath: `${API_URL}/files/${fileName}`,
+        fileExt: null,
+        fileName: fileName,
+        mimeType: null,
+        content: null,
+        isPublic: false
+      });
+      if (response.status === 200) {
+        return response.data; 
+      } else {
+        throw new Error("Error inesperado al crear la carpeta.");
+      }
+    } catch (error) {
+      console.error("Error al crear la carpeta:", error);
+      throw error;
     }
   },
   
@@ -48,11 +91,11 @@ const fileService = {
         content,
         isPublic,
       });
-      console.log("Archivo/carpeta creado exitosamente:", response.data);
+      console.log("Archivo subido exitosamente:", response.data);
       return response.data;
     } catch (error) {
       console.error(
-        "Error al crear el archivo/carpeta:",
+        "Error al subir el archivo:",
         error.response?.data || error.message
       );
       throw error;
@@ -67,7 +110,6 @@ const fileService = {
       });
       const userData = response.data;
       localStorage.setItem("authToken", userData.token);
-      var token = localStorage.getItem("authToken");
       await axios.post(`${API_URL}/users`, {
         userName: userData.userId,
         token: token,
@@ -79,15 +121,15 @@ const fileService = {
     }
   },
 
-  deleteFileOrFolder: async (fileId, token, systemId) => {
+  deleteFileOrFolder: async (fileId) => {
     try {
       const response = await axios.delete(`${API_URL}/files/${fileId}`, {
         token: token,
-        systemId: systemId
+        systemId: "3"
       })
       return response.data;
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   },
 

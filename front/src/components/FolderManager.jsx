@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FolderIcon from '@mui/icons-material/Folder';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
@@ -13,25 +13,71 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  CircularProgress,
+  Typography
 } from "@mui/material";
+import fileService from "../services/fileService";
 
-//Componente para crear carpetas
 const FolderManager = ({
-  folders,
-  setFolders,
   selectedFolder,
   setSelectedFolder,
-  onDeleteFolder,
 }) => {
+  const [folders, setFolders] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("success");
 
-  // Estados para el diálogo de confirmación
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogAction, setDialogAction] = useState(null); // Puede ser "create" o "delete"
-  const [targetFolderName, setTargetFolderName] = useState("");
+  const [targetFolderId, setTargetFolderName] = useState("");
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFolders = async () => {
+      setIsLoading(true); 
+      setError(null);
+      try {
+        const files = await fileService.getAllFolders();
+        const filteredFolders = files.filter((file) => file.isFolder === true);
+        setFolders(filteredFolders);
+      } catch (err) {
+        setError("Error al cargar las carpetas. Intenta de nuevo más tarde.");
+      } finally {
+        setIsLoading(false); 
+      }
+    };
+
+    fetchFolders();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
+
+  if (folders.length === 0) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <Typography variant="h6" color="textSecondary">
+          No hay carpetas disponibles.
+        </Typography>
+      </Box>
+    );
+  }
 
   const openConfirmationDialog = (action, folderName = "") => {
     setDialogAction(action);
@@ -47,45 +93,64 @@ const FolderManager = ({
 
   const handleDialogConfirm = async () => {
     if (dialogAction === "create") {
-      setFolders([...folders, { nombre: newFolderName, archivos: [] }]);
-      setNewFolderName(""); // Limpiar el campo de entrada
+      setFolders([...folders, { fileName: newFolderName}]);
+      const newFolder = await fileService.createFolder(newFolderName);
       setAlertMessage("¡Carpeta creada correctamente!");
       setAlertSeverity("success");
+      setFolders((prevFolders) => [...prevFolders, newFolder]);
     } else if (dialogAction === "delete") {
-      const wasDeleted = await onDeleteFolder(targetFolderName, true); // Verificar si la operación fue exitosa
-      if (wasDeleted) {
-        setAlertMessage(`Carpeta "${targetFolderName}" eliminada correctamente.`);
-        setAlertSeverity("success");
-      } else {
-        setAlertMessage(`Error: no se pudo eliminar la carpeta "${targetFolderName}".`);
-        setAlertSeverity("error");
-      }
+      await deleteFolder(targetFolderId); 
     }
-  
     closeDialog();
     setOpenSnackbar(true);
   };
 
-  const createFolder = () => {
+  const deleteFolder = async (targetFolderId) => {
+    try {
+      const response = await fileService.deleteFileOrFolder(targetFolderId);
+      if (response.status === 200 || response.status === 204) {
+        setAlertMessage(`Carpeta eliminada correctamente.`);
+        setAlertSeverity("success");
+        setFolders((prevFolders) => prevFolders.filter((folder) => folder.id !== targetFolderId));
+      } else {
+        setAlertMessage(`Error: no se pudo eliminar la carpeta.`);
+        setAlertSeverity("error");
+      }
+    } catch (err) {
+      console.error("Error al eliminar la carpeta:", err);
+      setAlertMessage("Error al intentar eliminar la carpeta.");
+      setAlertSeverity("error");
+    } finally {
+      setOpenSnackbar(true);
+    }
+  }
+
+  const handleCreateFolder = () => {
     if (!newFolderName) {
-      setAlertMessage("Por favor, ingresa un nombre para la carpeta.");
-      setAlertSeverity("warning");
+      setAlertMessage("Por favor, ingresa un fileName para la carpeta.")
+      setAlertSeverity("warning")
       setOpenSnackbar(true);
       return;
     }
 
+    if (!newFolderName.trim()) {
+      setAlertMessage("El fileName de la carpeta no puede estar vacío.")
+      setAlertSeverity("warning")
+      setOpenSnackbar(true);
+      return;
+    }
     openConfirmationDialog("create");
   };
 
-  const handleDeleteFolder = (folderName) => {
-    openConfirmationDialog("delete", folderName);
+  const handleDeleteFolder = (id) => {
+    openConfirmationDialog("delete", id);
   };
 
   return (
     <Box>
       {/* Campo para crear una carpeta */}
       <TextField
-        label="Nombre de la nueva carpeta"
+        label="Nombre de la carpeta"
         variant="outlined"
         value={newFolderName}
         onChange={(e) => setNewFolderName(e.target.value)}
@@ -94,7 +159,7 @@ const FolderManager = ({
       <Button
         variant="contained"
         color="primary"
-        onClick={createFolder}
+        onClick={handleCreateFolder}
         sx={{ mb: 2 }}
       >
         Crear Carpeta
@@ -109,8 +174,8 @@ const FolderManager = ({
         >
           <option value="">Selecciona una carpeta</option>
           {folders.map((folder, index) => (
-            <option key={index} value={folder.nombre}>
-              {folder.nombre}
+            <option key={index} value={folder.fileName}>
+              {folder.fileName}
             </option>
           ))}
         </select>
@@ -119,7 +184,7 @@ const FolderManager = ({
       {/* Lista de carpetas con opción para eliminarlas */}
       {folders.map((folder) => (
         <Box
-          key={folder.nombre}
+          key={folder.id}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -129,12 +194,12 @@ const FolderManager = ({
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <FolderIcon sx={{ mr: 1, color: "primary.main" }} />
-            <span>{folder.nombre}</span>
+            <span>{folder.fileName}</span>
           </Box>
 
           <IconButton
             color="error"
-            onClick={() => handleDeleteFolder(folder.nombre)}
+            onClick={() => handleDeleteFolder(folder.id)}
           >
             <DeleteIcon />
           </IconButton>
@@ -159,7 +224,7 @@ const FolderManager = ({
           <DialogContentText>
             {dialogAction === "create"
               ? `¿Estás seguro de que deseas crear la carpeta "${newFolderName}"?`
-              : `¿Estás seguro de que deseas eliminar la carpeta "${targetFolderName}"?`}
+              : `¿Estás seguro de que deseas eliminar la carpeta "${targetFolderId}"?`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

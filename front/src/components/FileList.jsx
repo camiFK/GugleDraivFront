@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import TextField from "@mui/material/TextField";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -12,26 +12,47 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
+import fileService from "../services/fileService";
 
-function FileList({ files, onDeleteFile, selectedFolder }) {
+function FileList({ onDeleteFile, selectedFolder }) {
   const [searchText, setSearchText] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [files, setFiles] = useState([]);
 
-  const filteredFiles = files.filter(
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFilesByUser = async () => {
+      setIsLoading(true); 
+      setError(null);
+      try {
+        const filesFromApi = await fileService.getAllFiles();
+        const filteredFiles = filesFromApi.filter((file) => file.isFolder == false);
+        setFiles(filteredFiles);
+      } catch (err) {
+        setError("Error al cargar las carpetas. Intenta de nuevo más tarde.");
+      } finally {
+        setIsLoading(false); 
+      }
+    };
+
+    fetchFilesByUser();
+  }, []);
+
+  const searchedFiles = files.filter(
     (file) =>
-      file.nombre.toLowerCase().includes(searchText.toLowerCase()) &&
-      (!selectedFolder || file.path.includes(selectedFolder))
+      file.fileName.toLowerCase().includes(searchText.toLowerCase()) &&
+      (!selectedFolder || file.filePpath.includes(selectedFolder))
   );
 
   const columns = [
     { field: "id", headerName: "ID", width: 150 },
-    { field: "nombre", headerName: "Nombre", width: 250 },
+    { field: "fileName", headerName: "Nombre", width: 250 },
     {
-      field: "path",
+      field: "filePath",
       headerName: "Path",
       width: 250,
       renderCell: (params) => (
@@ -40,6 +61,9 @@ function FileList({ files, onDeleteFile, selectedFolder }) {
         </a>
       ),
     },
+    { field: "fileExt", headerName: "Ext", width: 150 },
+    { field: "fileUrl", headerName: "Url", width: 150 },
+    { field: "mimeType", headerName: "Type", width: 150 },
     {
       field: "actions",
       headerName: "Acciones",
@@ -73,7 +97,7 @@ function FileList({ files, onDeleteFile, selectedFolder }) {
         onChange={(e) => setSearchText(e.target.value)}
       />
       <DataGrid
-        rows={filteredFiles}
+        rows={searchedFiles}
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
