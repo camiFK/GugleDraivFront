@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8082';
-const PROD_URL = 'https://poo2024.unsada.edu.ar'
+const PROD_URL = 'https://poo2024.unsada.edu.ar/draiv/'
 
 // var token = localStorage.getItem("authToken");
 //var token = "token1";
@@ -10,7 +10,7 @@ const fileService = {
   getAllFiles: async (path = null) => {
     try {
       var token = localStorage.getItem("authToken");
-      let url = `${API_URL}/files?token=${token}&systemId=3`;
+      let url = `${PROD_URL}/files?token=${token}&systemId=3`;
       if (path) {
         // parametro opcional, si existe construye la url
         url += `&file=${encodeURIComponent(path)}`;
@@ -27,7 +27,7 @@ const fileService = {
     try {
       var token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/files?token=${token}&systemId=3`
+        `${PROD_URL}/files?token=${token}&systemId=3`
       );
       return response.data;
     } catch (error) {
@@ -39,7 +39,7 @@ const fileService = {
   getFileById: async (id) => {
     try {
       var token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/${id}`);
+      const response = await axios.get(`${PROD_URL}/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error al obtener el archivo con ID ${id}:`, error);
@@ -53,11 +53,11 @@ const fileService = {
       throw new Error("El nombre de la carpeta no puede estar vacío.");
     }
     try {
-      const response = await axios.post(`${API_URL}/files`, {
+      const response = await axios.post(`${PROD_URL}/files`, {
         token: token,
         systemId: "3",
         isFolder: true,
-        filePath: `${API_URL}/files/${fileName}`,
+        filePath: `${PROD_URL}/files/${fileName}`,
         fileExt: null,
         fileName: fileName,
         mimeType: null,
@@ -77,7 +77,7 @@ const fileService = {
 
   uploadFile: async (payload) => {
     try {
-      const response = await axios.post(`${API_URL}/files`, payload);
+      const response = await axios.post(`${PROD_URL}/files`, payload);
       console.log("Archivo subido exitosamente:", response.data);
       if (response.status == 200) {
         return { success: true, message: "¡Archivo subido exitosamente!" };
@@ -98,7 +98,7 @@ const fileService = {
       });
       const userData = response.data;
       localStorage.setItem("authToken", userData.token);
-      await axios.post(`${API_URL}/users`, {
+      await axios.post(`${PROD_URL}/users`, {
         userName: userData.userId,
         token: token,
         expiresIn: userData.expiresIn,
@@ -116,7 +116,7 @@ const fileService = {
       return;
     }
     try {
-      const response = await axios.delete(`${API_URL}/users/logout?token=${token}`, {
+      const response = await axios.delete(`${PROD_URL}/users/logout?token=${token}`, {
         token: token,
       });
 
@@ -134,7 +134,7 @@ const fileService = {
   deleteFileOrFolder: async (fileId) => {
     try {
       var token = localStorage.getItem("authToken");
-      const response = await axios.delete(`${API_URL}/files/${fileId}?token=${token}&systemId=3`);
+      const response = await axios.delete(`${PROD_URL}/files/${fileId}?token=${token}&systemId=3`);
       if (response.status == 200) {
         return { success: true, message: "¡Archivo subido exitosamente!" };
       }
@@ -146,7 +146,7 @@ const fileService = {
 
   downloadFile: async (fileHash) => {
     try {
-      const response = await axios.get(`${API_URL}/files/download/${fileHash}`);
+      const response = await axios.get(`${PROD_URL}/files/download/${fileHash}`);
       if (response.status == 200) {
         return { success: true, message: "¡Archivo descargado exitosamente!" };
       }
