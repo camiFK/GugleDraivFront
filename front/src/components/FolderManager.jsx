@@ -69,16 +69,6 @@ const FolderManager = ({
     );
   }
 
-  if (folders.length === 0) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <Typography variant="h6" color="textSecondary">
-          No hay carpetas disponibles.
-        </Typography>
-      </Box>
-    );
-  }
-
   const openConfirmationDialog = (action, folderName = "") => {
     setDialogAction(action);
     setTargetFolderName(folderName);
@@ -182,29 +172,59 @@ const FolderManager = ({
       </Box>
 
       {/* Lista de carpetas con opción para eliminarlas */}
-      {folders.map((folder) => (
+      {folders.length === 0 ? (
         <Box
-          key={folder.id}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 1,
-          }}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="10vh"
         >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <FolderIcon sx={{ mr: 1, color: "primary.main" }} />
-            <span>{folder.fileName}</span>
-          </Box>
-
-          <IconButton
-            color="error"
-            onClick={() => handleDeleteFolder(folder.id)}
-          >
-            <DeleteIcon />
-          </IconButton>
+          <Typography variant="h6" color="textSecondary">
+            No hay carpetas disponibles.
+          </Typography>
         </Box>
-      ))}
+      ) : (
+        <Box sx={{ mb: 2 }}>
+          <select
+            onChange={(e) => setSelectedFolder(e.target.value)}
+            value={selectedFolder}
+            style={{ width: "100%", padding: "8px" }}
+          >
+            <option value="">Selecciona una carpeta</option>
+            {folders.map((folder, index) => (
+              <option key={index} value={folder.fileName}>
+                {folder.fileName}
+              </option>
+            ))}
+          </select>
+        </Box>
+      )}
+
+      {folders.length > 0 && (
+          folders.map((folder) => (
+            <Box
+              key={folder.id}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 1,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <FolderIcon sx={{ mr: 1, color: "primary.main" }} />
+                <span>{folder.fileName}</span>
+              </Box>
+
+              <IconButton
+                color="error"
+                onClick={() => handleDeleteFolder(folder.id)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))
+        )}
 
       {/* Snackbar para mostrar mensajes de alerta */}
       <Snackbar

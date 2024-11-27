@@ -6,13 +6,14 @@ import { Button, Box } from "@mui/material";
 import fileService from "../services/fileService";
 
 function Navbar() {
-  const handleLogout = async () => {
+  const handleLogout = async (event) => {
+    event.preventDefault();
     try {
-    await fileService.logout(); // Se llama a la función de logout en fileService
-    window.location.href = "/login"; // Redirige después de cerrar sesión
+      await fileService.logout(); // Se llama a la función de logout en fileService
+      window.location.href = "/login"; // Redirige después de cerrar sesión
     } catch (error) {
-    console.error("Error al cerrar sesión:", error);
-    alert("Hubo un problema al cerrar sesión. Inténtalo de nuevo.");
+      console.error("Error al cerrar sesión:", error);
+      alert("Hubo un problema al cerrar sesión. Inténtalo de nuevo.");
     }
   };
 

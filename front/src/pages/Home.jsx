@@ -215,29 +215,20 @@ function Home() {
 
         {/* Sección de subir archivos */}
         {currentSection === "subirArchivos" && (
-          <Paper sx={{ padding: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Subir Archivos
-            </Typography>
-            {selectedFolder ? (
-              <>
-                <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                  Subiendo archivos a la carpeta:{" "}
-                  <strong>{selectedFolder}</strong>
-                </Typography>
-                <FileUpload
-                  onUpload={handleUpload}
-                  setErrorMessage={setAlert}
-                />
-              </>
-            ) : (
-              <Typography variant="body1" sx={{ mt: 2 }}>
-                No se ha seleccionado ninguna carpeta. Por favor, selecciona una
-                desde el menu Administrar Carpetas.
-              </Typography>
-            )}
-          </Paper>
-        )}
+        <Paper sx={{ padding: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Subir Archivos
+          </Typography>
+          <Typography variant="subtitle1" sx={{ mb: 2 }}>
+            Subiendo archivos a la carpeta:{" "}
+            <strong>{selectedFolder || "Carpeta raíz"}</strong>
+          </Typography>
+          <FileUpload
+            onUpload={(files) => handleUpload(files, selectedFolder || "root")}
+            setErrorMessage={setAlert}
+          />
+        </Paper>
+      )}
       </Container>
     </Box>
   );
