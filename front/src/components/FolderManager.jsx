@@ -40,9 +40,9 @@ const FolderManager = ({
       setIsLoading(true); 
       setError(null);
       try {
-        const files = await fileService.getAllFolders();
-        const filteredFolders = files.filter((file) => file.isFolder === true);
-        setFolders(filteredFolders);
+        const response = await fileService.getAllFolders();
+        const folders = response.filter((file) => file.isFolder === true);
+        setFolders(folders)
       } catch (err) {
         setError("Error al cargar las carpetas. Intenta de nuevo más tarde.");
       } finally {
@@ -156,20 +156,6 @@ const FolderManager = ({
       </Button>
 
       {/* Selección de carpeta */}
-      <Box sx={{ mb: 2 }}>
-        <select
-          onChange={(e) => setSelectedFolder(e.target.value)}
-          value={selectedFolder}
-          style={{ width: "100%", padding: "8px" }}
-        >
-          <option value="">Selecciona una carpeta</option>
-          {folders.map((folder, index) => (
-            <option key={index} value={folder.fileName}>
-              {folder.fileName}
-            </option>
-          ))}
-        </select>
-      </Box>
 
       {/* Lista de carpetas con opción para eliminarlas */}
       {folders.length === 0 ? (

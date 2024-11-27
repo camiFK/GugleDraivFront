@@ -75,37 +75,16 @@ const fileService = {
     }
   },
 
-  uploadFile: async ({
-    token,
-    systemId,
-    isFolder,
-    filePath,
-    fileExt,
-    fileName,
-    mimeType,
-    content,
-    isPublic,
-  }) => {
+  uploadFile: async (payload) => {
     try {
-      var token = localStorage.getItem("authToken");
-      const response = await axios.post(`${API_URL}/files`, {
-        token,
-        systemId,
-        isFolder,
-        filePath,
-        fileExt,
-        fileName,
-        mimeType,
-        content,
-        isPublic,
-      });
+      const response = await axios.post(`${API_URL}/files`, payload);
       console.log("Archivo subido exitosamente:", response.data);
-      return response.data;
+      if (response.status == 200) {
+        return { success: true, message: "¡Archivo subido exitosamente!" };
+      }
+      return { success: false, message: "Error desconocido." };
     } catch (error) {
-      console.error(
-        "Error al subir el archivo:",
-        error.response?.data || error.message
-      );
+      console.error("Error al subir el archivo:", error.response?.data || error.message);
       throw error;
     }
   },
@@ -155,11 +134,11 @@ const fileService = {
   deleteFileOrFolder: async (fileId) => {
     try {
       var token = localStorage.getItem("authToken");
-      const response = await axios.delete(`${API_URL}/files/${fileId}`, {
-        token: token,
-        systemId: "3",
-      });
-      return response.data;
+      const response = await axios.delete(`${API_URL}/files/${fileId}?token=${token}&systemId=3`);
+      if (response.status == 200) {
+        return { success: true, message: "¡Archivo subido exitosamente!" };
+      }
+      return { success: false, message: "Error desconocido." };
     } catch (error) {
       throw error;
     }

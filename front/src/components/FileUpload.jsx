@@ -1,65 +1,140 @@
-import React from "react";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import React, { useState, useEffect } from "react";
+import { Button, TextField, Checkbox, FormControlLabel, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import fileService from "../services/fileService";
-import { useState, useEffect } from "react";
 
-function FileUpload({setErrorMessage}) {
+function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, setOpenSnackbar }) {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
-  const [filePath, setFilePath] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [message, setMessage] = useState("");
-  const [token, setToken] = useState([]);
+  const [token, setToken] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [fileToUpload, setFileToUpload] = useState(null);
+  const [fileBase64, setFileBase64] = useState(null);
+  const basePath = "http://localhost:8082/files/"
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token) {
       setToken(token);
     }
   }, []);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
     setFileName(e.target.files[0]?.name || "");
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFileBase64(reader.result.split(',')[1]); 
+    };
+    reader.readAsDataURL(selectedFile);
   };
 
-  const handleUpload = async () => {
+  const confirmUpload = async () => {
     if (!file) {
       setErrorMessage({
         message: "Por favor, selecciona un archivo antes de subir.",
         severity: "error",
       });
-      return
+      return;
     }
-    try {
-      const payload = {
-        token: token,
-        systemId: "3",
-        isFolder: file.isFolder,
-        filePath: file.filePath,
-        fileExt: fileName.split(".").pop(),
-        fileName: file.fileName,
-        mimeType: file.type,
-        content: file.content,
-        isPublic: file.isPublic,
-      };
 
-      const result = await fileService.uploadFile(payload);
-      setMessage(`Archivo subido exitosamente. ID: ${result.fileId}`);
+    try {
+      const filePayload = {
+        token,
+        systemId: "3",
+        isFolder: false,
+        filePath: basePath + fileName,
+        fileExt: fileName.split(".").pop(),
+        fileName,
+        mimeType: file.type,
+        content: fileBase64,
+        isPublic
+      };
+      const response = await fileService.uploadFile(filePayload);
+
+      if (response.success) {
+        setAlert({
+          message: "¡Archivo subido correctamente!",
+          severity: "success",
+        });
+
+        setFolders((prevFolders) =>
+          prevFolders.map((folder) =>
+            folder.fileName === selectedFolder
+              ? { ...folder, archivos: [...folder.archivos, response.file] }
+              : folder
+          )
+        );
+      } else {
+        throw new Error("Error al subir el archivo.");
+      }
     } catch (error) {
-      setMessage(
-        "Error al subir el archivo. Revisa la consola para más detalles."
-      );
+      setAlert({ message: error.message, severity: "error" });
+    } finally {
+      setDialogOpen(false);
+      setOpenSnackbar(true);
     }
   };
 
   return (
     <div>
+      {/* Selección del archivo */}
       <input type="file" onChange={handleFileChange} />
-      <Button onClick={handleUpload} variant="contained" color="primary" style={{ marginTop: "12px", width: "100%" }}>
+
+      {/* Campo de texto para el nombre del archivo */}
+      <TextField
+        label="Nombre del archivo"
+        variant="outlined"
+        value={fileName}
+        onChange={(e) => setFileName(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+
+      {/* Checkbox para la visibilidad pública */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={isPublic}
+            onChange={(e) => setIsPublic(e.target.checked)}
+            color="primary"
+          />
+        }
+        label="¿Hacer público el archivo?"
+      />
+
+      {/* Botón para subir archivo */}
+      <Button
+        onClick={() => setDialogOpen(true)}  // Mostrar diálogo de confirmación
+        variant="contained"
+        color="primary"
+        style={{ marginTop: "12px", width: "100%" }}
+      >
         Subir Archivo
       </Button>
+
+      {/* Diálogo de confirmación de subida */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>Confirmar Subida</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro de que deseas subir el archivo <strong>{fileToUpload?.name}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={confirmUpload} color="primary">
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Mensaje de éxito o error */}
       {message && <p>{message}</p>}
     </div>
   );
