@@ -3,14 +3,16 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8082';
 const PROD_URL = 'https://poo2024.unsada.edu.ar'
 
-var token = localStorage.getItem("authToken");
+// var token = localStorage.getItem("authToken");
 //var token = "token1";
 
 const fileService = {
   getAllFiles: async (path = null) => {
     try {
+      var token = localStorage.getItem("authToken");
       let url = `${API_URL}/files?token=${token}&systemId=3`;
-      if (path) { // parametro opcional, si existe construye la url
+      if (path) {
+        // parametro opcional, si existe construye la url
         url += `&file=${encodeURIComponent(path)}`;
       }
       const response = await axios.get(url);
@@ -23,7 +25,10 @@ const fileService = {
 
   getAllFolders: async () => {
     try {
-      const response = await axios.get(`${API_URL}/files?token=${token}&systemId=3`);
+      var token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${API_URL}/files?token=${token}&systemId=3`
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener las carpetas:", error);
@@ -33,6 +38,7 @@ const fileService = {
 
   getFileById: async (id) => {
     try {
+      var token = localStorage.getItem("authToken");
       const response = await axios.get(`${API_URL}/${id}`);
       return response.data;
     } catch (error) {
@@ -42,6 +48,7 @@ const fileService = {
   },
 
   createFolder: async (fileName) => {
+    var token = localStorage.getItem("authToken");
     if (!fileName || !fileName.trim()) {
       throw new Error("El nombre de la carpeta no puede estar vacío.");
     }
@@ -55,7 +62,7 @@ const fileService = {
         fileName: fileName,
         mimeType: null,
         content: null,
-        isPublic: false
+        isPublic: false,
       });
       if (response.status === 200) {
         return response.data;
@@ -67,7 +74,7 @@ const fileService = {
       throw error;
     }
   },
-  
+
   uploadFile: async ({
     token,
     systemId,
@@ -80,6 +87,7 @@ const fileService = {
     isPublic,
   }) => {
     try {
+      var token = localStorage.getItem("authToken");
       const response = await axios.post(`${API_URL}/files`, {
         token,
         systemId,
@@ -104,6 +112,7 @@ const fileService = {
 
   loginAndSaveToken: async (username, password) => {
     try {
+      var token = localStorage.getItem("authToken");
       const response = await axios.post(`${PROD_URL}/cuentas/login`, {
         username: username,
         password: password,
@@ -127,14 +136,12 @@ const fileService = {
       console.error("No hay un token de autenticación disponible.");
       return;
     }
-
     try {
-      const response = await axios.post(`${API_URL}/users/logout` , {
-        token: token
+      const response = await axios.delete(`${API_URL}/users/logout?token=${token}`, {
+        token: token,
       });
 
       if (response.status === 200) {
-        
         localStorage.removeItem("authToken");
         console.log("Sesión cerrada exitosamente.");
       } else {
@@ -147,16 +154,16 @@ const fileService = {
 
   deleteFileOrFolder: async (fileId) => {
     try {
+      var token = localStorage.getItem("authToken");
       const response = await axios.delete(`${API_URL}/files/${fileId}`, {
         token: token,
-        systemId: "3"
-      })
+        systemId: "3",
+      });
       return response.data;
     } catch (error) {
       throw error;
     }
   },
-
 };
 
 export default fileService;
