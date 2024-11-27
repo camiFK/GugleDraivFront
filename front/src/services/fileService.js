@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8082';
-const PROD_URL = 'https://poo2024.unsada.edu.ar/draiv/'
+const PROD_URL = 'http://poo-dev.unsada.edu.ar:8082'
 const PROD_URL_USERS = 'http://poo-dev.unsada.edu.ar:8088/cuentas/API/login'
 
 // var token = localStorage.getItem("authToken");
