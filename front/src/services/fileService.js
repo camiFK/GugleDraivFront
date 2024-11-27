@@ -143,6 +143,18 @@ const fileService = {
       throw error;
     }
   },
+
+  downloadFile: async (fileHash) => {
+    try {
+      const response = await axios.get(`${API_URL}/files/download/${fileHash}`);
+      if (response.status == 200) {
+        return { success: true, message: "¡Archivo descargado exitosamente!" };
+      }
+      return { success: false, message: "Error desconocido." };
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default fileService;

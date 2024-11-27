@@ -3,6 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import TextField from "@mui/material/TextField";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
+import DownloadIcon from "@mui/icons-material/Download";
 import { Snackbar, Alert } from "@mui/material";
 import {
   Dialog,
@@ -68,12 +69,21 @@ function FileList({ selectedFolder }) {
       headerName: "Acciones",
       width: 100,
       renderCell: (params) => (
+        <div>
         <IconButton
           color="error"
           onClick={() => handleDeleteFile(params.row.id)}
         >
           <DeleteIcon />
         </IconButton>
+
+        <IconButton
+          color="primary"
+          onClick={() => handleDownloadFile(params.row.id)}
+        >
+          <DownloadIcon />
+        </IconButton>
+      </div>
       ),
       sortable: false,
       filterable: false,
@@ -99,6 +109,25 @@ function FileList({ selectedFolder }) {
       setOpenSnackbar(true);
     }
     setDeleteDialogOpen(false); 
+  };
+
+  const handleDownloadFile = async (fileId) => {
+    const file = files.find((f) => f.id === fileId);
+    if (file != null) {
+      const fileDownload = await fileService.downloadFile(file.fileHash);
+
+      if (fileDownload.status == 400 || fileDownload.status == 500) {
+        setError("Error al descargar el archivo. Intenta de nuevo más tarde.");
+      }
+    } else {
+      setError("Error al descargar el archivo. Intenta de nuevo más tarde.");
+    }
+    // if (file) {
+    //   const link = document.createElement("a");
+    //   link.href = file.fileURL;
+    //   link.download = file.fileHash;
+    //   link.click();
+    // }
   };
 
   return (
