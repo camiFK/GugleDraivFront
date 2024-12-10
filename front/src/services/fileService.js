@@ -105,7 +105,7 @@ const fileService = {
         token: userData.token,
         expiresIn: userData.expiresIn,
       });
-      return token;
+      return userData.token;
     } catch (error) {
       throw error;
     }
