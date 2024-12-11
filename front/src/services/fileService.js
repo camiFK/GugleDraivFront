@@ -12,7 +12,8 @@ const fileService = {
   getAllFiles: async (path = null) => {
     try {
       var token = localStorage.getItem("authToken");
-      let url = `${API_URL}/files?token=${token}&systemId=3`;
+      var userId = localStorage.getItem("userId");
+      let url = `${API_URL}/files?token=${token}&systemId=3&userId=${userId}`;
       if (path) {
         // parametro opcional, si existe construye la url
         url += `&file=${encodeURIComponent(path)}`;
@@ -28,9 +29,8 @@ const fileService = {
   getAllFolders: async () => {
     try {
       var token = localStorage.getItem("authToken");
-      const response = await axios.get(
-        `${API_URL}/files?token=${token}&systemId=3`
-      );
+      var userId = localStorage.getItem("userId");
+      const response = await axios.get(`${API_URL}/files?token=${token}&systemId=3&userId=${userId}`);
       return response.data;
     } catch (error) {
       console.error("Error al obtener las carpetas:", error);
@@ -41,7 +41,8 @@ const fileService = {
   getFileById: async (id) => {
     try {
       var token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/${id}`);
+      var userId = localStorage.getItem("userId");
+      const response = await axios.get(`${API_URL}/files/${id}?token=${token}&systemId=3&userId=${userId}`);
       return response.data;
     } catch (error) {
       console.error(`Error al obtener el archivo con ID ${id}:`, error);
@@ -49,23 +50,14 @@ const fileService = {
     }
   },
 
-  createFolder: async (fileName) => {
+  createFolder: async (folderPayload) => {
     var token = localStorage.getItem("authToken");
-    if (!fileName || !fileName.trim()) {
+    var userId = localStorage.getItem("userId");
+    if (!folderPayload.fileName || !folderPayload.fileName.trim()) {
       throw new Error("El nombre de la carpeta no puede estar vacío.");
     }
     try {
-      const response = await axios.post(`${API_URL}/files`, {
-        token: token,
-        systemId: "3",
-        isFolder: true,
-        filePath: `${API_URL}/files/${fileName}`,
-        fileExt: null,
-        fileName: fileName,
-        mimeType: null,
-        content: null,
-        isPublic: false,
-      });
+      const response = await axios.post(`${API_URL}/files`, folderPayload);
       if (response.status === 200) {
         return response.data;
       } else {
@@ -86,7 +78,10 @@ const fileService = {
       }
       return { success: false, message: "Error desconocido." };
     } catch (error) {
-      console.error("Error al subir el archivo:", error.response?.data || error.message);
+      console.error(
+        "Error al subir el archivo:",
+        error.response?.data || error.message
+      );
       throw error;
     }
   },
@@ -139,9 +134,11 @@ const fileService = {
   deleteFileOrFolder: async (fileId) => {
     try {
       var token = localStorage.getItem("authToken");
-      const response = await axios.delete(`${API_URL}/files/${fileId}?token=${token}&systemId=3`);
+      const response = await axios.delete(
+        `${API_URL}/files/${fileId}?token=${token}&systemId=3`
+      );
       if (response.status == 200) {
-        return { success: true, message: "¡Archivo subido exitosamente!" };
+        return { success: true, message: "Archivo eliminado" };
       }
       return { success: false, message: "Error desconocido." };
     } catch (error) {
@@ -159,7 +156,7 @@ const fileService = {
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
 export default fileService;

@@ -6,12 +6,7 @@ import {
   Paper,
   Button,
   Alert,
-  Snackbar,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
+  Snackbar
 } from "@mui/material";
 import FileUpload from "../components/FileUpload";
 import FileList from "../components/FileList";
@@ -25,8 +20,6 @@ function Home() {
   const [currentSection, setCurrentSection] = useState("inicio");
   const [alert, setAlert] = useState({ message: "", severity: "" });
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [fileToUpload, setFileToUpload] = useState(null);
 
   useEffect(() => {
     var token = localStorage.getItem("authToken");
@@ -35,10 +28,10 @@ function Home() {
     }
   }, []);
 
-  const getSelectedFolderFiles = () => {
-    const folder = folders.find((folder) => folder.fileName === selectedFolder);
-    console.log(folder)
-    return folder ? folder.archivos : [];
+  const getSelectedFolderFiles = async () => {
+    const folders = await fileService.getAllFolders();
+    const thisFolder = folders.find((folder) => folder.fileName === selectedFolder)
+    console.log(thisFolder) // continuar
   };
 
   return (
@@ -90,14 +83,21 @@ function Home() {
 
         {/* Sección de inicio */}
         {currentSection === "inicio" && (
-          <Paper sx={{ padding: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Archivos y Carpetas
-            </Typography>
-            <FileList
-              selectedFolder={selectedFolder}
-            />
-          </Paper>
+             <Paper
+             sx={{
+               padding: 5,
+               width: "100%",
+               boxSizing: "border-box", 
+               overflow: "hidden",
+             }}
+           >
+             <Typography variant="h6" gutterBottom>
+               Archivos
+             </Typography>
+             <FileList 
+              selectedFolder={selectedFolder} 
+              setAlert={setAlert}/>
+           </Paper>
         )}
 
         {/* Sección de administrar carpetas */}
@@ -109,6 +109,7 @@ function Home() {
             <FolderManager
               selectedFolder={selectedFolder}
               setSelectedFolder={setSelectedFolder}
+              setAlert={setAlert}
               // onDeleteFolder={handleDelete}
             />
           </Paper>

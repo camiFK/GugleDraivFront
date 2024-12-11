@@ -21,6 +21,7 @@ import fileService from "../services/fileService";
 const FolderManager = ({
   selectedFolder,
   setSelectedFolder,
+  setAlert
 }) => {
   const [folders, setFolders] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
@@ -34,8 +35,20 @@ const FolderManager = ({
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  const basePath = "http://localhost:8082/draiv/files"
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      setToken(token);
+    }
+    if (userId) {
+      setUserId(userId);
+    }
     const fetchFolders = async () => {
       setIsLoading(true); 
       setError(null);
@@ -83,13 +96,35 @@ const FolderManager = ({
 
   const handleDialogConfirm = async () => {
     if (dialogAction === "create") {
-      setFolders([...folders, { fileName: newFolderName}]);
-      const newFolder = await fileService.createFolder(newFolderName);
-      setAlertMessage("¡Carpeta creada correctamente!");
-      setAlertSeverity("success");
-      setFolders((prevFolders) => [...prevFolders, newFolder]);
+      setFolders([...folders, { fileName: newFolderName }]);
+
+      try {
+        const folderPayload = {
+          token,
+          systemId: "3",
+          userId,
+          isFolder: true,
+          filePath: `${basePath}/${newFolderName}`,
+          fileExt: null,
+          fileName: newFolderName,
+          mimeType: null,
+          content: null,
+          isPublic: false,
+        };
+
+        const response = await fileService.createFolder(folderPayload);
+        if (response.status == 200) {
+          setAlertMessage("¡Carpeta creada correctamente!");
+          setAlertSeverity("success");
+          setFolders((prevFolders) => [...prevFolders, response]);
+        } else {
+          throw new Error("Error al crear la carpeta.");
+        }
+      } catch (error) {
+        setAlert({ message: error.message, severity: "error" });
+      }
     } else if (dialogAction === "delete") {
-      await deleteFolder(targetFolderId); 
+      await deleteFolder(targetFolderId);
     }
     closeDialog();
     setOpenSnackbar(true);

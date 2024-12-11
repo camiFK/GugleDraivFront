@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import fileService from "../services/fileService";
 
-function FileList({ selectedFolder }) {
+function FileList({ selectedFolder, setAlert }) {
   const [searchText, setSearchText] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -77,12 +77,12 @@ function FileList({ selectedFolder }) {
           <DeleteIcon />
         </IconButton>
 
-        <IconButton
+        {/* <IconButton
           color="primary"
-          onClick={() => handleDownloadFile(params.row.id)}
+          onClick={() => handleDownloadFile(params.row.fileHash)}
         >
           <DownloadIcon />
-        </IconButton>
+        </IconButton> */}
       </div>
       ),
       sortable: false,
@@ -111,27 +111,19 @@ function FileList({ selectedFolder }) {
     setDeleteDialogOpen(false); 
   };
 
-  const handleDownloadFile = async (fileId) => {
-    const file = files.find((f) => f.id === fileId);
-    if (file != null) {
-      const fileDownload = await fileService.downloadFile(file.fileHash);
-
+  const handleDownloadFile = async (fileHash) => {
+    if (fileHash != null) {
+      const fileDownload = await fileService.downloadFile(fileHash);
       if (fileDownload.status == 400 || fileDownload.status == 500) {
-        setError("Error al descargar el archivo. Intenta de nuevo más tarde.");
+        setError("Error al descargar el archivo." + fileDownload.message);
       }
     } else {
-      setError("Error al descargar el archivo. Intenta de nuevo más tarde.");
+      setError("Error al descargar el archivo. No existe el fileHash.");
     }
-    // if (file) {
-    //   const link = document.createElement("a");
-    //   link.href = file.fileURL;
-    //   link.download = file.fileHash;
-    //   link.click();
-    // }
   };
 
   return (
-    <div style={{ height: 500, width: "100%" }}>
+    <div style={{ height: 300, width: "100%" }}>
       <TextField
         label="Buscar archivo"
         variant="outlined"

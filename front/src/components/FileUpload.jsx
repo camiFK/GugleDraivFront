@@ -8,15 +8,19 @@ function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, set
   const [isPublic, setIsPublic] = useState(false);
   const [message, setMessage] = useState("");
   const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [fileToUpload, setFileToUpload] = useState(null);
   const [fileBase64, setFileBase64] = useState(null);
-  const basePath = "http://localhost:8082/files/"
+  const basePath = "http://localhost:8082/draiv/files/"
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
+    const userId = localStorage.getItem("userId");
     if (token) {
       setToken(token);
+    }
+    if (userId) {
+      setUserId(userId);
     }
   }, []);
 
@@ -40,18 +44,26 @@ function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, set
       });
       return;
     }
+    
+    if (selectedFolder != null) {
+      const allFolders = await fileService.getAllFolders();
+      var thisFolder = allFolders.find((f) => f.fileName === selectedFolder);
+      var folderPath = `${basePath}${thisFolder.fileName}/`;
+    }
 
     try {
       const filePayload = {
         token,
         systemId: "3",
+        userId,
         isFolder: false,
-        filePath: basePath + fileName,
+        filePath: folderPath + fileName,
         fileExt: fileName.split(".").pop(),
         fileName,
         mimeType: file.type,
         content: fileBase64,
-        isPublic
+        isPublic,
+        folderId: thisFolder.id
       };
       const response = await fileService.uploadFile(filePayload);
 
@@ -121,7 +133,7 @@ function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, set
         <DialogTitle>Confirmar Subida</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            ¿Estás seguro de que deseas subir el archivo <strong>{fileToUpload?.name}</strong>?
+            ¿Estás seguro de que deseas subir el archivo?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
