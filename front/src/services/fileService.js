@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8082';
+const API_URL = 'http://localhost:8082/draiv';
 const PROD_USERS = 'https://poo2024.unsada.edu.ar/cuentas/login'
-const PROD_URL = 'http://poo-dev.unsada.edu.ar:8082'
-const PROD_URL_USERS = 'https://poo-dev.unsada.edu.ar:8088/cuentas/API/login'
+const PROD_DRAIV = 'https://poo-dev.unsada.edu.ar:8082'
+const PROD_LOGIN = 'https://poo-dev.unsada.edu.ar:8088/cuentas/API/login'
 
 // var token = localStorage.getItem("authToken");
 //var token = "token1";
@@ -94,12 +94,13 @@ const fileService = {
   loginAndSaveToken: async (username, password) => {
     try {
       var token = localStorage.getItem("authToken");
-      const response = await axios.post(`${PROD_URL_USERS}`, {
+      const response = await axios.post(`${PROD_LOGIN}`, {
         username: username,
         password: password,
       });
       const userData = response.data;
       localStorage.setItem("authToken", userData.token);
+      localStorage.setItem("userId", userData.userId);
       await axios.post(`${API_URL}/users`, {
         userId: userData.userId,
         token: userData.token,
@@ -112,15 +113,17 @@ const fileService = {
   },
 
   logout: async () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      console.error("No hay un token de autenticación disponible.");
-      return;
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      throw new Error("userId es null.");
     }
     try {
-      const response = await axios.delete(`${API_URL}/users/logout?token=${token}`, {
-        token: token,
-      });
+      const response = await axios.delete(
+        `${API_URL}/users/logout?userId=${userId}`,
+        {
+          userId: userId,
+        }
+      );
 
       if (response.status === 200) {
         localStorage.removeItem("authToken");
