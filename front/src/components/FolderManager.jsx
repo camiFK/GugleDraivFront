@@ -117,6 +117,8 @@ const FolderManager = ({
           setAlertMessage("¡Carpeta creada correctamente!");
           setAlertSeverity("success");
           setFolders((prevFolders) => [...prevFolders, response]);
+          setNewFolderName("");
+          setAlertMessage("");
         } else {
           throw new Error("Error al crear la carpeta.");
         }
@@ -133,18 +135,21 @@ const FolderManager = ({
   const deleteFolder = async (targetFolderId) => {
     try {
       const response = await fileService.deleteFileOrFolder(targetFolderId);
-      if (response.status === 200 || response.status === 204) {
+      if (response.success) {
         setAlertMessage(`Carpeta eliminada correctamente.`);
         setAlertSeverity("success");
         setFolders((prevFolders) => prevFolders.filter((folder) => folder.id !== targetFolderId));
+        setAlertMessage("");
       } else {
         setAlertMessage(`Error: no se pudo eliminar la carpeta.`);
         setAlertSeverity("error");
+        setAlertMessage("");
       }
     } catch (err) {
       console.error("Error al eliminar la carpeta:", err);
       setAlertMessage("Error al intentar eliminar la carpeta.");
       setAlertSeverity("error");
+      setAlertMessage("");
     } finally {
       setOpenSnackbar(true);
     }

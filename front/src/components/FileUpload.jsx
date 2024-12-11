@@ -44,11 +44,24 @@ function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, set
       });
       return;
     }
+
+    let folderPath = basePath;
+    let folderId = null;
     
-    if (selectedFolder != null) {
+    if (Boolean(selectedFolder)) {
       const allFolders = await fileService.getAllFolders();
-      var thisFolder = allFolders.find((f) => f.fileName === selectedFolder);
-      var folderPath = `${basePath}${thisFolder.fileName}/`;
+      const thisFolder = allFolders.find((f) => f.fileName === selectedFolder);
+  
+      if (thisFolder) {
+        folderPath = `${basePath}${thisFolder.fileName}/`;
+        folderId = thisFolder.id;
+      } else {
+        setErrorMessage({
+          message: "La carpeta seleccionada no existe.",
+          severity: "error",
+        });
+        return;
+      }
     }
 
     try {
@@ -63,7 +76,7 @@ function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, set
         mimeType: file.type,
         content: fileBase64,
         isPublic,
-        folderId: thisFolder.id
+        folderId
       };
       const response = await fileService.uploadFile(filePayload);
 
@@ -78,8 +91,10 @@ function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, set
             folder.fileName === selectedFolder
               ? { ...folder, archivos: [...folder.archivos, response.file] }
               : folder
-          )
-        );
+          ));
+
+          setFile(null);
+          setFileName("");
       } else {
         throw new Error("Error al subir el archivo.");
       }

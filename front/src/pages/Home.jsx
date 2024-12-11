@@ -91,7 +91,10 @@ function Home() {
                overflow: "hidden",
              }}
            >
-             <Typography variant="h6" gutterBottom>
+            <Typography variant="h5" gutterBottom>
+              Carpeta: {selectedFolder?.trim() ? selectedFolder : "Carpeta raíz"}
+            </Typography>
+             <Typography variant="h5" gutterBottom>
                Archivos
              </Typography>
              <FileList 
