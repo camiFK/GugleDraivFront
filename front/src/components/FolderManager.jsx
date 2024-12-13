@@ -38,7 +38,7 @@ const FolderManager = ({
   const [token, setToken] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  const basePath = "http://localhost:8082/draiv/files"
+  const basePath = "https://poo-dev.unsada.edu.ar:8082/draiv/files"
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");

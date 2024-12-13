@@ -11,7 +11,7 @@ function FileUpload({ setErrorMessage, selectedFolder, setAlert, setFolders, set
   const [userId, setUserId] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [fileBase64, setFileBase64] = useState(null);
-  const basePath = "http://localhost:8082/draiv/files/"
+  const basePath = "https://poo-dev.unsada.edu.ar:8082/draiv/files/"
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
